@@ -3,20 +3,36 @@
 		<b-alert :show="showErrorAlert" variant="danger" dismissible @dismissed="showErrorAlert=false" class="alert">
 			{{ errorMessage }}
 		</b-alert>
-		<b-form @submit="onSubmit()">
-			<b-form-group label="Ime:" label-for="imeInput">
-				<b-form-input id="imeInput" type="text" v-model="queryData.ime" placeholder="Ime"></b-form-input>
-			</b-form-group>
-			<b-form-group label="Prezime:" label-for="prezimeInput">
-				<b-form-input id="prezimeInput" type="text" v-model="queryData.prezime" placeholder="Prezime"></b-form-input>
-			</b-form-group>
-			<b-form-group label="Skola:" label-for="skolaInput">
-				<b-form-input id="skolaInput" type="text" v-model="queryData.skola" placeholder="Skola"></b-form-input>
-			</b-form-group>
 
-			<b-button type="submit" variant="primary">Search</b-button>
-			<b-button type="reset" variant="secondary" @click="onReset()">Reset</b-button>
-		</b-form>
+		<b-button v-b-toggle.searchCollapse variant="priamry" @click="showSearch = !showSearch">Search for profesors</b-button>
+
+		<b-collapse id="searchCollapse" class="mt-2" v-model="showSearch">
+			<b-card>
+				<b-form @submit="onSubmit()" @reset="onReset()">
+					<b-form-group label="Ime:" label-for="imeInput">
+						<b-form-input id="imeInput" type="text" v-model="queryData.ime" placeholder="Ime"></b-form-input>
+					</b-form-group>
+					<b-form-group label="Prezime:" label-for="prezimeInput">
+						<b-form-input id="prezimeInput" type="text" v-model="queryData.prezime" placeholder="Prezime"></b-form-input>
+					</b-form-group>
+					<b-form-group label="Skola:" label-for="skolaInput">
+						<b-form-input id="skolaInput" type="text" v-model="queryData.skola" placeholder="Skola"></b-form-input>
+					</b-form-group>
+
+					<b-button type="submit" variant="primary">Search</b-button>
+					<b-button type="reset" variant="secondary">Reset</b-button>
+				</b-form>
+			</b-card>
+		</b-collapse>
+
+		<ul id="listOfProfesori">
+			<li v-for="profesor in listPorfesori" v-bind:key="profesor.jmbg">
+				<b-card>
+					<h3>{{ profesor.ime }} {{ profesor.prezime }}</h3>
+					<p>JMBG: {{ profesor.jmbg }}</p>
+				</b-card>
+			</li>
+		</ul>
 	</div>
 </template>
 
@@ -30,11 +46,10 @@ export default {
 				prezime: '',
 				skola: ''
 			},
-			listPorfesori: {
-
-			},
+			listPorfesori: [],
 			errorMessage: null,
-			showErrorAlert: false
+			showErrorAlert: false,
+			showSearch: false
 		}
 	},
 	methods: {
@@ -47,9 +62,11 @@ export default {
 			if (this.queryData.prezime !== '') {
 				query.prezime = this.queryData.prezime;
 			}
-			if (this.queryData.skole !== '') {
+			if (this.queryData.skola !== '') {
 				query.skola = this.queryData.skola;
 			}
+
+			console.log(query);
 
 			fetch('http://localhost:3000/api/queryProfesori', {
 				method: 'POST',
@@ -68,6 +85,8 @@ export default {
 
 			this.onReset();
 
+			this.showSearch = false;
+
 			return false;
 		},
 		onReset () {
@@ -76,6 +95,8 @@ export default {
 				prezime: '',
 				skola: ''
 			};
+			
+			return false;
 		}
 	}
 }
@@ -89,5 +110,12 @@ export default {
 .alert {
 	width: 300px;
 	margin-left: calc((100% - 300px)/2);
+}
+#listOfProfesori {
+	padding: 0;
+	list-style-type: none;
+	width: 350px;
+	margin-left: calc((100% - 350px)/2);
+	margin-top: 20px;
 }
 </style>
