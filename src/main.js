@@ -4,8 +4,10 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import BootstramVue from 'bootstrap-vue'
+import VueSession from 'vue-session'
 
-Vue.use(BootstramVue);
+Vue.use(BootstramVue)
+Vue.use(VueSession)
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'

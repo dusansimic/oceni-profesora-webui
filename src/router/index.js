@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from '@/components/Home'
 import SearchProfesori from '@/components/SearchProfesori'
 import AddProfesor from '@/components/AddProfesor'
+import ProfesorProfile from '@/components/ProfesorProfile'
 
 Vue.use(Router)
 
@@ -22,6 +23,11 @@ export default new Router({
       path: '/profesori/add',
       name: 'Add Profesor',
       component: AddProfesor
+    },
+    {
+      path: '/profesori/profile',
+      name: 'Profile',
+      component: ProfesorProfile
     }
   ]
 })

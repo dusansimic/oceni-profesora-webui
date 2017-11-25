@@ -19,8 +19,14 @@
 						<b-form-input id="skolaInput" type="text" v-model="queryData.skola" placeholder="Skola"></b-form-input>
 					</b-form-group>
 
-					<b-button type="submit" variant="primary">Search</b-button>
-					<b-button type="reset" variant="secondary">Reset</b-button>
+					<b-container>
+						<b-row align-h="end">
+							<b-col cols="4.5">
+								<b-button type="reset" variant="secondary">Reset</b-button>
+								<b-button type="submit" variant="primary">Search</b-button>
+							</b-col>
+						</b-row>
+					</b-container>
 				</b-form>
 			</b-card>
 		</b-collapse>
@@ -30,6 +36,7 @@
 				<b-card>
 					<h3>{{ profesor.ime }} {{ profesor.prezime }}</h3>
 					<p>JMBG: {{ profesor.jmbg }}</p>
+					<router-link to="/profesori/profile"><p v-on:click="viewProfesor(profesor.jmbg)">Vidi profesora</p></router-link>
 				</b-card>
 			</li>
 		</ul>
@@ -66,8 +73,6 @@ export default {
 				query.skola = this.queryData.skola;
 			}
 
-			console.log(query);
-
 			fetch('http://localhost:3000/api/queryProfesori', {
 				method: 'POST',
 				headers: new Headers({
@@ -97,6 +102,9 @@ export default {
 			};
 			
 			return false;
+		},
+		viewProfesor (jmbg) {
+			this.$session.set('profesorId', jmbg);
 		}
 	}
 }

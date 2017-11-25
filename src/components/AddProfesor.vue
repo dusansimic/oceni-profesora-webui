@@ -1,6 +1,8 @@
 <template>
 	<div class="AddProfesor">
-		<b-alert :show="showOkAlert" dismissible variant="success" @dismissed="showOkAlert=false"></b-alert>
+		<b-alert :show="showOkAlert" dismissible variant="success" @dismissed="showOkAlert=false">
+			{{ okMessage }}
+		</b-alert>
 		<b-form @submit="onSubmit()" @reset="onReset()">
 			<b-form-group label="Ime:" label-for="imeInput">
 				<b-form-input id="imeInput" type="text" v-model="profesorData.ime" required placeholder="Ime"></b-form-input>
@@ -12,8 +14,14 @@
 				<b-form-input id="jmbgInput" type="number" v-model="profesorData.jmbg" required placeholder="JMBG"></b-form-input>
 			</b-form-group>
 
-			<b-button type="submit" variant="primary">Add</b-button>
-			<b-button type="reset" variant="secondary">Reset</b-button>
+			<b-container>
+						<b-row align-h="end">
+							<b-col cols="4.5">
+								<b-button type="reset" variant="secondary">Reset</b-button>
+								<b-button type="submit" variant="primary">Add</b-button>
+							</b-col>
+						</b-row>
+					</b-container>
 		</b-form>
 	</div>
 </template>
