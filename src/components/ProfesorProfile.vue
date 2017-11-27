@@ -29,7 +29,13 @@
 		</b-form></br>
 		<h3>Komentari:</h3></br>
 		<ul id="listOfKomentari">
-
+			<li v-for="komentar in komentari" v-bind:key="komentar.user">
+				<b-card class="komentarCard">
+					<p>{{ komentar.text }}</p>
+					<p>Ocena: <strong>{{ komentar.ocena }}</strong></p>
+					<p><i>by <strong>{{ komentar.user }}</strong> {{ getTimeFromNow(komentar.vreme) }}</i></p>
+				</b-card>
+			</li>
 		</ul>
 	</div>
 </template>
@@ -39,14 +45,13 @@ export default {
 	name: 'ProfesorProfile',
 	data () {
 		return {
-			profesorData: {
-
-			},
+			profesorData: {},
 			komentarData: {
 				user: '',
 				text: '',
 				ocena: null
 			},
+			komentari: [],
 			showErrorAlert: false,
 			errorMessage: ''
 		}
@@ -65,7 +70,26 @@ export default {
 					jmbg: profesorJMBG
 				})
 			}).then(res => res.json()).then(data => {
-				this.profesorData = JSON.parse(JSON.stringify(data))[0];
+				this.profesorData = JSON.parse(JSON.stringify(data[0]));
+				this.getKomentari();
+			}).catch(err => {
+				if (err) {
+					this.showErrorAlert = true;
+					this.errorMessage = err.message;
+				}
+			});
+		},
+		getKomentari () {
+			fetch(this.$config.ApiUrl + '/getKomentari/fromProfesor', {
+				method: 'POST',
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				}),
+				body: JSON.stringify({
+					jmbg: this.profesorData.jmbg
+				})
+			}).then(res => res.json()).then(data => {
+				this.komentari = JSON.parse(JSON.stringify(data[0].komentari));
 			}).catch(err => {
 				if (err) {
 					this.showErrorAlert = true;
@@ -74,7 +98,45 @@ export default {
 			});
 		},
 		onSubmit () {
-			fetch('')
+			fetch(this.$config.ApiUrl + '/addKomentar', {
+				method: 'POST',
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				}),
+				body: JSON.stringify({
+					prof: {
+						jmbg: this.profesorData.jmbg
+					},
+					komentar: {
+						user: this.komentarData.user,
+						text: this.komentarData.text,
+						ocena: this.komentarData.ocena,
+						vreme: new Date()
+					}
+				})
+			}).then(res => res.json()).then(data => {
+				this.onReset();
+				this.getKomentari();
+			}).catch(err => {
+				if (err) {
+					this.showErrorAlert = true;
+					this.errorMessage = err.message;
+				}
+			});
+
+			return false;
+		},
+		onReset () {
+			this.komentarData = {
+				user: '',
+				text: '',
+				ocena: null
+			};
+
+			return false;
+		},
+		getTimeFromNow (time) {
+			return this.$moment(time).fromNow();
 		}
 	},
 	created () {
@@ -88,11 +150,28 @@ export default {
 	width: 700px;
 	margin-left: calc((100% - 700px)/2);
 }
+#listOfKomentari {
+	padding: 0;
+	list-style-type: none;
+	width: 350px;
+	margin-left: calc((100% - 350px)/2);
+	margin-top: 20px;
+}
+.komentarCard {
+	margin-top: 10px;
+}
 
 @media screen and (max-width: 767px) {
 	.ProfesorProfile {
 		width: 90%;
 		margin-left: calc((100% - 90%)/2);
+	}
+	#listOfKomentari {
+		padding: 0;
+		list-style-type: none;
+		width: 85%;
+		margin-left: calc((100% - 85%)/2);
+		margin-top: 20px;
 	}
 }
 </style>

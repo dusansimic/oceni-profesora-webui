@@ -5,10 +5,13 @@ import App from './App'
 import router from './router'
 import BootstramVue from 'bootstrap-vue'
 import VueSession from 'vue-session'
+import moment from 'moment'
+import VueMomentJS from 'vue-momentjs'
 import config from './config.json'
 
 Vue.use(BootstramVue)
 Vue.use(VueSession)
+Vue.use(VueMomentJS, moment);
 
 Vue.prototype.$config = config;
 
