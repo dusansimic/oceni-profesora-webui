@@ -73,7 +73,7 @@ export default {
 				query.skola = this.queryData.skola;
 			}
 
-			fetch('http://localhost:3000/api/queryProfesori', {
+			fetch(this.$config.ApiUrl + '/queryProfesori', {
 				method: 'POST',
 				headers: new Headers({
 					'Content-Type': 'application/json'
@@ -106,7 +106,7 @@ export default {
 		viewProfesor (jmbg) {
 			this.$session.set('profesorId', jmbg);
 		}
-	}
+	}	
 }
 </script>
 
@@ -125,5 +125,23 @@ export default {
 	width: 350px;
 	margin-left: calc((100% - 350px)/2);
 	margin-top: 20px;
+}
+
+@media screen and (max-width: 767px) {
+	.SearchProfesori {
+		width: 90%;
+		margin-left: calc((100% - 90%)/2);
+	}
+	.alert {
+		width: 80%;
+		margin-left: calc((100% - 80%)/2);
+	}
+	#listOfProfesori {
+		padding: 0;
+		list-style-type: none;
+		width: 85%;
+		margin-left: calc((100% - 85%)/2);
+		margin-top: 20px;
+	}
 }
 </style>

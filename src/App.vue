@@ -2,9 +2,9 @@
   <div id="app">
     <div id="wrapper">
       <b-navbar toggleable="md" type="dark" variant="primary" id="navbar">
-        <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
-
         <b-navbar-brand to="/">Oceni profesora</b-navbar-brand>
+
+        <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
 
         <b-collapse is-nav id="nav_collapse">
           <b-navbar-nav>
@@ -32,7 +32,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 10px;
 }
 #wrapper {
   width: 700px;
@@ -40,5 +40,12 @@ export default {
 }
 #navbar {
   border-radius: 5px;
+}
+
+@media screen and (max-width: 767px) {
+  #wrapper {
+    width: 95%;
+    margin-left: calc((100% - 95%)/2);
+  }
 }
 </style>

@@ -5,9 +5,12 @@ import App from './App'
 import router from './router'
 import BootstramVue from 'bootstrap-vue'
 import VueSession from 'vue-session'
+import config from './config.json'
 
 Vue.use(BootstramVue)
 Vue.use(VueSession)
+
+Vue.prototype.$config = config;
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'

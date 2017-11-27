@@ -46,7 +46,7 @@ export default {
 	},
 	methods: {
 		onSubmit () {
-			fetch('http://localhost:3000/api/addProfesor', {
+			fetch(this.$config.ApiUrl + '/addProfesor', {
 				method: 'POST',
 				headers: new Headers({
 					'Content-Type': 'application/json'
@@ -88,5 +88,12 @@ export default {
 .AddProfesor {
   width: 500px;
   margin-left: calc((100% - 500px)/2);
+}
+
+@media screen and (max-width: 767px) {
+	.AddProfesor {
+		width: 90%;
+		margin-left: calc((100% - 90%)/2);
+	}
 }
 </style>
