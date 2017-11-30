@@ -15,13 +15,13 @@
 			</b-form-group>
 
 			<b-container>
-						<b-row align-h="end">
-							<b-col cols="4.5">
-								<b-button type="reset" variant="secondary">Reset</b-button>
-								<b-button type="submit" variant="primary">Add</b-button>
-							</b-col>
-						</b-row>
-					</b-container>
+				<b-row align-h="end">
+					<b-col cols="4.5">
+						<b-button type="reset" variant="secondary">Reset</b-button>
+						<b-button type="submit" variant="primary">Add</b-button>
+					</b-col>
+				</b-row>
+			</b-container>
 		</b-form>
 	</div>
 </template>
