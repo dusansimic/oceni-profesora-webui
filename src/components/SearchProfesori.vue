@@ -61,24 +61,32 @@ export default {
 	},
 	methods: {
 		onSubmit () {
-			let query = {};
+			let query = '';
 			
 			if (this.queryData.ime !== '') {
-				query.ime = this.queryData.ime;
+				query += 'ime=' + this.queryData.ime;
 			}
 			if (this.queryData.prezime !== '') {
-				query.prezime = this.queryData.prezime;
+				if (query != '') {
+					query += '&';
+				}
+				query += 'prezime=' + this.queryData.prezime;
 			}
 			if (this.queryData.skola !== '') {
-				query.skola = this.queryData.skola;
+				if (!query.endsWith('&')) {
+					query += '&';
+				}
+				query += 'skola=' + this.queryData.skola;
+			}
+			if (query !== '') {
+				query = '?' + query;
 			}
 
-			fetch(this.$config.ApiUrl + '/queryProfesori', {
-				method: 'POST',
+			fetch(this.$config.ApiUrl + '/queryProfesori' + query, {
+				method: 'GET',
 				headers: new Headers({
 					'Content-Type': 'application/json'
-				}),
-				body: JSON.stringify(query)
+				})
 			}).then(res => res.json()).then(data => {
 				this.listPorfesori = JSON.parse(JSON.stringify(data));
 			}).catch(err => {
@@ -126,6 +134,9 @@ export default {
 	margin-left: calc((100% - 350px)/2);
 	margin-top: 20px;
 }
+#listOfProfesori li {
+	margin-top: 10px;
+}
 
 @media screen and (max-width: 767px) {
 	.SearchProfesori {
@@ -142,6 +153,9 @@ export default {
 		width: 85%;
 		margin-left: calc((100% - 85%)/2);
 		margin-top: 20px;
+	}
+	#listOfProfesori li {
+		margin-top: 10px;
 	}
 }
 </style>
