@@ -36,7 +36,8 @@ export default {
 				prezime: '',
 				jmbg: '',
 				skole: [],
-				komentari: []
+				komentari: [],
+				ocene: []
 			},
 			okMessage: '',
 			showOkAlert: false,
@@ -53,7 +54,7 @@ export default {
 				}),
 				body: JSON.stringify(this.profesorData)
 			}).then(res => res.json()).then(data => {
-				if (data.insertedCount === 1) {
+				if (data.ok) {
 					this.showOkAlert = true;
 					this.okMessage = 'Profesor je dodat!';
 				} else {
@@ -75,7 +76,8 @@ export default {
 				prezime: '',
 				jmbg: '',
 				skole: [],
-				komentari: []
+				komentari: [],
+				ocene: []
 			};
 
 			return false;

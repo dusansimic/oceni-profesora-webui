@@ -6,33 +6,44 @@
 
 		<h2>{{ profesorData.ime }} {{ profesorData.prezime }}</h2>
 		<p>JMBG: {{ profesorData.jmbg }}</p>
+		<p v-if="profesorData.srednjaOcena">Srednja ocena: {{ profesorData.srednjaOcena }}</p>
 
-		<b-form @submit="onSubmit()" @reset="onReset()">
+		<b-form @submit="onSubmitKomentar()" @reset="onResetKomentar()">
 			<b-form-group label="Ime:" label-for="imeInput">
 				<b-form-input id="imeInput" type="text" v-model="komentarData.user" placeholder="User"></b-form-input>
 			</b-form-group>
 			<b-form-group>
 				<b-form-textarea id="textInput" v-model="komentarData.text" placeholder="Text" :rows="3" :max-rows="6"></b-form-textarea>
 			</b-form-group>
+
+			<b-container>
+				<b-row align-h="end">
+					<b-col cols="4.5">
+						<b-button type="reset" variant="secondary">Reset</b-button>
+						<b-button type="submit" variant="primary">Comment</b-button>
+					</b-col>
+				</b-row>
+			</b-container>
+		</b-form></br>
+		<b-form @submit="onSubmitOcena()" @reset="onResetOcena()">
 			<b-form-group label="Ocena:" label-for="ocenaInput">
-				<b-form-input id="ocenaInput" type="number" v-model="komentarData.ocena" placeholder="1-5"></b-form-input>
+				<b-form-input id="ocenaInput" type="number" v-model="ocenaData.ocena" placeholder="1-5"></b-form-input>
 			</b-form-group>
 
 			<b-container>
-						<b-row align-h="end">
-							<b-col cols="4.5">
-								<b-button type="reset" variant="secondary">Reset</b-button>
-								<b-button type="submit" variant="primary">Comment</b-button>
-							</b-col>
-						</b-row>
-					</b-container>
+				<b-row align-h="end">
+					<b-col cols="4.5">
+						<b-button type="reset" variant="secondary">Reset</b-button>
+						<b-button type="submit" variant="primary">Comment</b-button>
+					</b-col>
+				</b-row>
+			</b-container>
 		</b-form></br>
 		<h3>Komentari:</h3></br>
 		<ul id="listOfKomentari">
 			<li v-for="komentar in komentari" v-bind:key="komentar.user">
 				<b-card class="komentarCard">
 					<p>{{ komentar.text }}</p>
-					<p>Ocena: <strong>{{ komentar.ocena }}</strong></p>
 					<p><i>by <strong>{{ komentar.user }}</strong> {{ getTimeFromNow(komentar.vreme) }}</i></p>
 					<b-container>
 						<b-row align-h="end">
@@ -58,7 +69,9 @@ export default {
 			profesorData: {},
 			komentarData: {
 				user: '',
-				text: '',
+				text: ''
+			},
+			ocenaData: {
 				ocena: null
 			},
 			komentari: [],
@@ -100,7 +113,7 @@ export default {
 				}
 			});
 		},
-		onSubmit () {
+		onSubmitKomentar () {
 			fetch(this.$config.ApiUrl + '/addKomentar/' + this.profesorData.jmbg, {
 				method: 'PUT',
 				headers: new Headers({
@@ -115,7 +128,7 @@ export default {
 					dislikes: 0
 				})
 			}).then(res => res.json()).then(data => {
-				this.onReset();
+				this.onResetOcena();
 				this.getKomentari();
 			}).catch(err => {
 				if (err) {
@@ -126,10 +139,47 @@ export default {
 
 			return false;
 		},
-		onReset () {
+		onResetKomentar () {
 			this.komentarData = {
 				user: '',
-				text: '',
+				text: ''
+			};
+
+			return false;
+		},
+		onSubmitOcena () {
+			fetch(this.$config.ApiUrl + '/addOcena/' + this.profesorData.jmbg, {
+				method: 'PUT',
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				}),
+				body: JSON.stringify({
+					ocena: parseInt(this.ocenaData.ocena)
+				})
+			}).then(res => res.json()).then(data => {
+				this.onResetOcena();
+				fetch(this.$config.ApiUrl + '/queryProfesori?jmbg=' + this.profesorData.jmbg, {
+					method: 'GET',
+					headers: new Headers({
+						'Content-Type': 'application/json'
+					})
+				}).then(res => res.json()).then(data => {
+					this.profesorData = JSON.parse(JSON.stringify(data[0]));
+				}).catch(err => {
+					if (err) {
+						this.showErrorAlert = true;
+						this.errorMessage = err.message;
+					}
+				});
+			}).catch(err => {
+				if (err) {
+					this.showErrorAlert = true;
+					this.errorMessage = err.message;
+				}
+			});
+		},
+		onResetOcena () {
+			this.ocenaData = {
 				ocena: null
 			};
 
@@ -146,7 +196,7 @@ export default {
 				})
 			}).then(res => res.json()).then(data => {
 				this.getKomentari();
-			}).cathc(err => {
+			}).catch(err => {
 				if (err) {
 					this.showErrorAlert = true;
 					this.errorMessage = err.message;
