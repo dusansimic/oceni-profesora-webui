@@ -7,6 +7,7 @@
 		<h2>{{ profesorData.ime }} {{ profesorData.prezime }}</h2>
 		<p>JMBG: {{ profesorData.jmbg }}</p>
 		<p v-if="profesorData.srednjaOcena">Srednja ocena: {{ profesorData.srednjaOcena }}</p>
+		<router-link to="/profesori/search"><b-button type="button" variant="danger" v-on:click="deleteUser()">Delete user</b-button></router-link>
 
 		<b-form @submit="onSubmitKomentar()" @reset="onResetKomentar()">
 			<b-form-group label="Ime:" label-for="imeInput">
@@ -48,6 +49,7 @@
 					<b-container>
 						<b-row align-h="end">
 							<b-col cols="4.5">
+								<b-button type="button" variant="danger" @click="deleteKomentar(komentar._id)">Delete</b-button>
 								<b-button-group>
 									<b-button type="button" @click="onLike(true, komentar._id)" v-b-tooltip.hover :title="getNumberOfLikes(komentar, true)">Like</b-button>
 									<b-button type="button" @click="onLike(false, komentar._id)" v-b-tooltip.hover :title="getNumberOfLikes(komentar, false)">Dislike</b-button>
@@ -209,6 +211,37 @@ export default {
 			}
 
 			return komentar.dislikes + ((komentar.dislikes == 1) ? ' dislike' : ' dislikes');
+		},
+		deleteUser () {
+			fetch(this.$config.ApiUrl + '/removeProfesor/' + this.profesorData.jmbg, {
+				method: 'DELETE',
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				})
+			}).then(res => res.json()).then(data => {
+				console.log(data);
+			}).catch(err => {
+				if (err) {
+					this.showErrorAlert = true;
+					this.errorMessage = err.message;
+				}
+			});
+		},
+		deleteKomentar (komentarID) {
+			fetch(this.$config.ApiUrl + '/removeKomentar/' + this.profesorData.jmbg + '/' + komentarID, {
+				method: 'DELETE',
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				})
+			}).then(res => res.json()).then(data => {
+				console.log(data);
+				this.getKomentari();
+			}).catch(err => {
+				if (err) {
+					this.showErrorAlert = true;
+					this.errorMessage = err.message;
+				}
+			});
 		}
 	},
 	created () {
