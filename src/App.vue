@@ -8,13 +8,16 @@
 
         <b-collapse is-nav id="nav_collapse">
           <b-navbar-nav>
-            <b-nav-item to="/">Home</b-nav-item>
-            <b-nav-item to="/profesori/search">Search Profesori</b-nav-item>
-            <b-nav-item to="/profesori/add">Add Profesor</b-nav-item>
+            <b-nav-item to="/" exact>Home</b-nav-item>
+            <b-nav-item to="/profesori/search" exact>Search Profesori</b-nav-item>
+            <b-nav-item to="/profesori/add" exact>Add Profesor</b-nav-item>
+            <b-nav-item to="/login" exact v-if="!this.$session.has('userData')">Login</b-nav-item>
+            <b-nav-item to="/register" exact v-if="!this.$session.has('userData')">Register</b-nav-item>
+            <b-nav-item @click="logout()" exact v-if="this.$session.has('userData')">Logout</b-nav-item>
           </b-navbar-nav>
         </b-collapse>
       </b-navbar>
-      </br>
+      <br/>
       <router-view/>
     </div>
   </div>
@@ -22,7 +25,13 @@
 
 <script>
 export default {
-  name: 'app'
+  name: 'app',
+  methods: {
+    logout () {
+      this.$session.remove('userData')
+      this.$forceUpdate()
+    }
+  }
 }
 </script>
 
@@ -43,9 +52,15 @@ export default {
 }
 
 @media screen and (max-width: 767px) {
+  #app {
+    margin-top: 0;
+  }
   #wrapper {
-    width: 95%;
-    margin-left: calc((100% - 95%)/2);
+    width: 100%;
+    margin-left: 0;
+  }
+  #navbar {
+    border-radius: 0;
   }
 }
 </style>

@@ -7,13 +7,10 @@
 		<h2>{{ profesorData.ime }} {{ profesorData.prezime }}</h2>
 		<p>JMBG: {{ profesorData.jmbg }}</p>
 		<p v-if="profesorData.srednjaOcena">Srednja ocena: {{ profesorData.srednjaOcena }}</p>
-		<router-link to="/profesori/search"><b-button type="button" variant="danger" v-on:click="deleteUser()">Delete user</b-button></router-link>
+		<router-link to="/profesori/search"><b-button type="button" :size="sm" variant="danger" v-on:click="deleteUser()">Delete user</b-button></router-link>
 
-		<b-form @submit="onSubmitKomentar()" @reset="onResetKomentar()">
-			<b-form-group label="Ime:" label-for="imeInput">
-				<b-form-input id="imeInput" type="text" v-model="komentarData.user" placeholder="User"></b-form-input>
-			</b-form-group>
-			<b-form-group>
+		<b-form @submit="onSubmitKomentar()" @reset="onResetKomentar()" v-if="this.$session.has('userData')">
+			<b-form-group label="Tekst komentara:" label-for="textInput">
 				<b-form-textarea id="textInput" v-model="komentarData.text" placeholder="Text" :rows="3" :max-rows="6"></b-form-textarea>
 			</b-form-group>
 
@@ -25,8 +22,8 @@
 					</b-col>
 				</b-row>
 			</b-container>
-		</b-form></br>
-		<b-form @submit="onSubmitOcena()" @reset="onResetOcena()">
+		</b-form><br/>
+		<b-form @submit="onSubmitOcena()" @reset="onResetOcena()" v-if="this.$session.has('userData')">
 			<b-form-group label="Ocena:" label-for="ocenaInput">
 				<b-form-input id="ocenaInput" type="number" v-model="ocenaData.ocena" placeholder="1-5"></b-form-input>
 			</b-form-group>
@@ -35,12 +32,12 @@
 				<b-row align-h="end">
 					<b-col cols="4.5">
 						<b-button type="reset" variant="secondary">Reset</b-button>
-						<b-button type="submit" variant="primary">Comment</b-button>
+						<b-button type="submit" variant="primary">Oceni</b-button>
 					</b-col>
 				</b-row>
 			</b-container>
-		</b-form></br>
-		<h3>Komentari:</h3></br>
+		</b-form><br/>
+		<h3>Komentari:</h3><br/>
 		<ul id="listOfKomentari">
 			<li v-for="komentar in komentari" v-bind:key="komentar.user">
 				<b-card class="komentarCard">
@@ -70,7 +67,6 @@ export default {
 		return {
 			profesorData: {},
 			komentarData: {
-				user: '',
 				text: ''
 			},
 			ocenaData: {
@@ -85,11 +81,8 @@ export default {
 		whenCreated () {
 			const profesorJMBG = this.$session.get('profesorId');
 
-			fetch(this.$config.ApiUrl + '/queryProfesori?jmbg=' + profesorJMBG, {
-				method: 'GET',
-				headers: new Headers({
-					'Content-Type': 'application/json'
-				})
+			fetch(`${this.$config.ApiUrl}/profesor?jmbg=${profesorJMBG}`, {
+				method: 'GET'
 			}).then(res => res.json()).then(data => {
 				this.profesorData = JSON.parse(JSON.stringify(data[0]));
 				this.getKomentari();
@@ -101,11 +94,8 @@ export default {
 			});
 		},
 		getKomentari () {
-			fetch(this.$config.ApiUrl + '/getKomentari/fromProfesor/' + this.profesorData.jmbg, {
-				method: 'GET',
-				headers: new Headers({
-					'Content-Type': 'application/json'
-				})
+			fetch(`${this.$config.ApiUrl}/komentar/${this.profesorData.jmbg}`, {
+				method: 'GET'
 			}).then(res => res.json()).then(data => {
 				this.komentari = JSON.parse(JSON.stringify(data[0].komentari));
 			}).catch(err => {
@@ -116,41 +106,39 @@ export default {
 			});
 		},
 		onSubmitKomentar () {
-			fetch(this.$config.ApiUrl + '/addKomentar/' + this.profesorData.jmbg, {
+			fetch(`${this.$config.ApiUrl}/komentar/${this.profesorData.jmbg}`, {
 				method: 'PUT',
 				headers: new Headers({
 					'Content-Type': 'application/json'
 				}),
 				body: JSON.stringify({
-					user: this.komentarData.user,
+					user: this.$session.get('userData').username,
 					text: this.komentarData.text,
-					ocena: this.komentarData.ocena,
 					vreme: new Date(),
 					likes: 0,
 					dislikes: 0
 				})
 			}).then(res => res.json()).then(data => {
-				this.onResetOcena();
-				this.getKomentari();
+				this.onResetOcena()
+				this.getKomentari()
+				this.onResetOcena()
 			}).catch(err => {
 				if (err) {
 					this.showErrorAlert = true;
 					this.errorMessage = err.message;
 				}
-			});
-
+			})
 			return false;
 		},
 		onResetKomentar () {
 			this.komentarData = {
-				user: '',
 				text: ''
 			};
 
 			return false;
 		},
 		onSubmitOcena () {
-			fetch(this.$config.ApiUrl + '/addOcena/' + this.profesorData.jmbg, {
+			fetch(`${this.$config.ApiUrl}/ocena/${this.profesorData.jmbg}`, {
 				method: 'PUT',
 				headers: new Headers({
 					'Content-Type': 'application/json'
@@ -160,11 +148,8 @@ export default {
 				})
 			}).then(res => res.json()).then(data => {
 				this.onResetOcena();
-				fetch(this.$config.ApiUrl + '/queryProfesori?jmbg=' + this.profesorData.jmbg, {
-					method: 'GET',
-					headers: new Headers({
-						'Content-Type': 'application/json'
-					})
+				fetch(`${this.$config.ApiUrl}/profesor?jmbg=${this.profesorData.jmbg}`, {
+					method: 'GET'
 				}).then(res => res.json()).then(data => {
 					this.profesorData = JSON.parse(JSON.stringify(data[0]));
 				}).catch(err => {
@@ -179,6 +164,7 @@ export default {
 					this.errorMessage = err.message;
 				}
 			});
+
 		},
 		onResetOcena () {
 			this.ocenaData = {
@@ -191,7 +177,7 @@ export default {
 			return this.$moment(time).fromNow();
 		},
 		onLike (isLike, komentarID) {
-			fetch(this.$config.ApiUrl + '/' + (isLike ? 'likeKomentar' : 'dislikeKomentar') + '/' + this.profesorData.jmbg + '/' + komentarID, {
+			fetch(`${this.$config.ApiUrl}/komentar/${(isLike ? 'like' : 'dislike')}/${this.profesorData.jmbg}/${komentarID}`, {
 				method: 'PUT',
 				headers: new Headers({
 					'Content-Type': 'application/json'
@@ -213,11 +199,8 @@ export default {
 			return komentar.dislikes + ((komentar.dislikes == 1) ? ' dislike' : ' dislikes');
 		},
 		deleteUser () {
-			fetch(this.$config.ApiUrl + '/removeProfesor/' + this.profesorData.jmbg, {
-				method: 'DELETE',
-				headers: new Headers({
-					'Content-Type': 'application/json'
-				})
+			fetch(`${this.$config.ApiUrl}/profesor/${this.profesorData.jmbg}`, {
+				method: 'DELETE'
 			}).then(res => res.json()).then(data => {
 				console.log(data);
 			}).catch(err => {
@@ -228,11 +211,8 @@ export default {
 			});
 		},
 		deleteKomentar (komentarID) {
-			fetch(this.$config.ApiUrl + '/removeKomentar/' + this.profesorData.jmbg + '/' + komentarID, {
-				method: 'DELETE',
-				headers: new Headers({
-					'Content-Type': 'application/json'
-				})
+			fetch(`${this.$config.ApiUrl}/komentar/${this.profesorData.jmbg}/${komentarID}`, {
+				method: 'DELETE'
 			}).then(res => res.json()).then(data => {
 				console.log(data);
 				this.getKomentari();
@@ -268,14 +248,14 @@ export default {
 
 @media screen and (max-width: 767px) {
 	.ProfesorProfile {
-		width: 90%;
-		margin-left: calc((100% - 90%)/2);
+		width: 95%;
+		margin-left: calc((100% - 95%)/2);
 	}
 	#listOfKomentari {
 		padding: 0;
 		list-style-type: none;
-		width: 85%;
-		margin-left: calc((100% - 85%)/2);
+		width: 95%;
+		margin-left: calc((100% - 95%)/2);
 		margin-top: 20px;
 	}
 }

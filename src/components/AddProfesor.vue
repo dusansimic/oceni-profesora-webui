@@ -47,7 +47,7 @@ export default {
 	},
 	methods: {
 		onSubmit () {
-			fetch(this.$config.ApiUrl + '/addProfesor', {
+			fetch(`${this.$config.ApiUrl}/profesor`, {
 				method: 'POST',
 				headers: new Headers({
 					'Content-Type': 'application/json'

@@ -82,11 +82,8 @@ export default {
 				query = '?' + query;
 			}
 
-			fetch(this.$config.ApiUrl + '/queryProfesori' + query, {
-				method: 'GET',
-				headers: new Headers({
-					'Content-Type': 'application/json'
-				})
+			fetch(`${this.$config.ApiUrl}/profesor${query}`, {
+				method: 'GET'
 			}).then(res => res.json()).then(data => {
 				this.listPorfesori = JSON.parse(JSON.stringify(data));
 			}).catch(err => {
@@ -140,18 +137,18 @@ export default {
 
 @media screen and (max-width: 767px) {
 	.SearchProfesori {
-		width: 90%;
-		margin-left: calc((100% - 90%)/2);
+		width: 95%;
+		margin-left: calc((100% - 95%)/2);
 	}
 	.alert {
-		width: 80%;
-		margin-left: calc((100% - 80%)/2);
+		width: 95%;
+		margin-left: calc((100% - 95%)/2);
 	}
 	#listOfProfesori {
 		padding: 0;
 		list-style-type: none;
-		width: 85%;
-		margin-left: calc((100% - 85%)/2);
+		width: 95%;
+		margin-left: calc((100% - 95%)/2);
 		margin-top: 20px;
 	}
 	#listOfProfesori li {

@@ -4,6 +4,8 @@ import Home from '@/components/Home'
 import SearchProfesori from '@/components/SearchProfesori'
 import AddProfesor from '@/components/AddProfesor'
 import ProfesorProfile from '@/components/ProfesorProfile'
+import Login from '@/components/Login'
+import Register from '@/components/Register'
 
 Vue.use(Router)
 
@@ -28,6 +30,16 @@ export default new Router({
       path: '/profesori/profile',
       name: 'Profile',
       component: ProfesorProfile
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: Login
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: Register
     }
   ]
 })
