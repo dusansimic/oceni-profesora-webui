@@ -1,27 +1,40 @@
 <template>
 	<div class="Login">
-		<b-alert :show="showErrorAlert" variant="danger" dismissible @dismissed="showErrorAlert=false" class="alert">
-			{{ errorMessage }}
-		</b-alert>
+		<notifications id="notificationGroup" group="login" position="bottom center" animation-type="css">
+			<template slot="body" slot-scope="props">
+				<b-alert show :variant="props.item.type">
+					<h4>{{ props.item.title }}</h4>
+					<p>{{ props.item.text }}</p>
+				</b-alert>
+			</template>
+		</notifications>
 
-		<b-card id="loginForm">
-			<b-form @submit="onSubmit()">
-				<b-form-group label="Korisinik:" label-for="usernameInput">
-					<b-form-input id="usernameInput" type="text" v-model="loginData.username" placeholder="Korisnik"></b-form-input>
-				</b-form-group>
-				<b-form-group label="Lozinka:" label-for="passwordInput">
-					<b-form-input id="passwordInput" type="password" v-model="loginData.password" placeholder="Lozinka"></b-form-input>
-				</b-form-group>
+		<b-container>
+			<b-row align-v="center">
+				<b-col>
+					<b-card id="loginForm">
+						<b-form @submit="onSubmit()">
+							<b-form-group label="Korisinik:" label-for="usernameInput">
+								<b-form-input id="usernameInput" type="text" v-model="loginData.username" placeholder="Korisnik" :state="loginData.usernameState"></b-form-input>
+								<b-form-invalid-feedback id="inputLiveFeedback">Username is incorrect</b-form-invalid-feedback>
+							</b-form-group>
+							<b-form-group label="Lozinka:" label-for="passwordInput">
+								<b-form-input id="passwordInput" type="password" v-model="loginData.password" placeholder="Lozinka" :state="loginData.passwordState"></b-form-input>
+								<b-form-invalid-feedback id="inputLiveFeedback">Password is incorrect</b-form-invalid-feedback>
+							</b-form-group>
 
-				<b-container>
-						<b-row align-h="end">
-							<b-col cols="4.5">
-								<b-button type="submit" variant="primary">Login</b-button>
-							</b-col>
-						</b-row>
-					</b-container>
-			</b-form>
-		</b-card>
+							<b-container>
+									<b-row align-h="end">
+										<b-col cols="4.5">
+											<b-button type="submit" variant="primary">Login</b-button>
+										</b-col>
+									</b-row>
+								</b-container>
+						</b-form>
+					</b-card>
+				</b-col>
+			</b-row>
+		</b-container>
 	</div>
 </template>
 
@@ -32,11 +45,15 @@ export default {
 		return {
 			loginData: {
 				username: '',
+				usernameState: null,
 				password: '',
+				passwordState: null,
 				hashedPassword: ''
 			},
 			showErrorAlert: false,
-			errorMessage: ''
+			errorMessage: '',
+			showOkAlert: false,
+			okMessage: ''
 		}
 	},
 	methods: {
@@ -45,6 +62,8 @@ export default {
 		},
 		onSubmit () {
 			this.hashPassword()
+			this.loginData.usernameState = null
+			this.loginData.passwordState = null
 			fetch(`${this.$config.ApiUrl}/user/auth`, {
 				method: 'POST',
 				headers: new Headers({
@@ -60,12 +79,24 @@ export default {
 						username: this.loginData.username,
 						token: data.token
 					})
-					this.$forceUpdate()
+					this.$forceUpdate(),
+					this.$router.push({ name: 'Home' })
+				} else if (data.status > 399) {
+					this.$notify({
+						group: 'login',
+						title: 'Login failed',
+						text: data.message,
+						type: 'danger',
+						duration: 8000
+					})
+					if (data.message === 'User with that username was not found!') {
+						this.loginData.usernameState = false
+					}
+					if (data.message === 'Password was incorrect!') {
+						this.loginData.passwordState = false
+					}
 				}
-				if (data.status > 399) {
-					this.errorMessage = data.message
-					this.showErrorAlert = true
-				}
+				console.log(data)
 			}).catch(err => {
 				this.errorMessage = err.message
 				this.showErrorAlert = true
@@ -76,9 +107,19 @@ export default {
 </script>
 
 <style>
+.Login {
+	height: calc(100vh - 76px);
+}
+#loginContainer {
+	height: 100%;
+}
 #loginForm {
 	width: 500px;
 	margin-left: calc((100% - 500px)/2);
+}
+.alert {
+	width: 250px;
+	margin-left: calc((100% - 250px)/2);
 }
 
 @media screen and (max-width: 767px) {
@@ -87,8 +128,12 @@ export default {
 		margin-left: calc((100% - 95%)/2);
 	}
 	#loginForm {
-		width: 95%;
-		margin-left: calc((100% - 95%)/2);
+		width: 100%;
+		margin-left: 0;
+	}
+	.alert {
+		width: 100%;
+		margin-left: 0;
 	}
 }
 </style>

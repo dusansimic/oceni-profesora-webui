@@ -1,17 +1,26 @@
 <template>
 	<div class="AddProfesor">
-		<b-alert :show="showOkAlert" dismissible variant="success" @dismissed="showOkAlert=false">
-			{{ okMessage }}
-		</b-alert>
+		<notifications id="notificationGroup" group="addProfesor" position="bottom center" animation-type="css">
+			<template slot="body" slot-scope="props">
+				<b-alert show :variant="props.item.type">
+					<h4>{{ props.item.title }}</h4>
+					<p v-if="props.item.text">{{ props.item.text }}</p>
+				</b-alert>
+			</template>
+		</notifications>
+
 		<b-form @submit="onSubmit()" @reset="onReset()">
 			<b-form-group label="Ime:" label-for="imeInput">
-				<b-form-input id="imeInput" type="text" v-model="profesorData.ime" required placeholder="Ime"></b-form-input>
+				<b-form-input id="imeInput" type="text" v-model="profesorData.ime" required placeholder="Ime" :state="profesorDataStates.imeState"></b-form-input>
+				<b-form-invalid-feedback id="inputLiveFeedback">Morate uneti ime profesora</b-form-invalid-feedback>
 			</b-form-group>
 			<b-form-group label="Prezime:" label-for="prezimeInput">
-				<b-form-input id="prezimeInput" type="text" v-model="profesorData.prezime" required placeholder="Prezime"></b-form-input>
+				<b-form-input id="prezimeInput" type="text" v-model="profesorData.prezime" required placeholder="Prezime" :state="profesorDataStates.prezimeState"></b-form-input>
+				<b-form-invalid-feedback id="inputLiveFeedback">Morate uneti prezime profesora</b-form-invalid-feedback>
 			</b-form-group>
 			<b-form-group label="JMBG:" label-for="jmbgInput">
-				<b-form-input id="jmbgInput" type="number" v-model="profesorData.jmbg" required placeholder="JMBG"></b-form-input>
+				<b-form-input id="jmbgInput" type="number" v-model="profesorData.jmbg" required placeholder="JMBG" :state="profesorDataStates.jmbgState"></b-form-input>
+				<b-form-invalid-feedback id="inputLiveFeedback">Morate uneti validan JMBG</b-form-invalid-feedback>
 			</b-form-group>
 
 			<b-container>
@@ -39,14 +48,22 @@ export default {
 				komentari: [],
 				ocene: []
 			},
-			okMessage: '',
-			showOkAlert: false,
-			errorMessage: '',
-			showErrorAlert: false
+			profesorDataStates: {
+				imeState: null,
+				prezimeState: null,
+				jmbgState: null
+			}
 		}
 	},
 	methods: {
+		checkData () {
+			this.profesorDataStates.imeState = !!this.profesorData.ime
+			this.profesorDataStates.prezimeState = !!this.profesorData.prezime
+			this.profesorDataStates.jmbgState = (this.profesorData.jmbg.length === 13)
+			return this.profesorDataStates.imeState && this.profesorDataStates.prezimeState && this.profesorDataStates.jmbgState
+		},
 		onSubmit () {
+			if (!this.checkData()) return
 			fetch(`${this.$config.ApiUrl}/profesor`, {
 				method: 'POST',
 				headers: new Headers({
@@ -54,12 +71,21 @@ export default {
 				}),
 				body: JSON.stringify(this.profesorData)
 			}).then(res => res.json()).then(data => {
-				if (data.ok) {
-					this.showOkAlert = true;
-					this.okMessage = 'Profesor je dodat!';
+				if (data !== null) {
+					this.$notify({
+						group: 'addProfesor',
+						title: 'Profesor je dodat!',
+						type: 'success',
+						duration: 8000
+					})
 				} else {
-					this.showErrorAlert = true;
-					this.errorMessage = 'Something went terrebly wrong!';
+					this.$notify({
+						group: 'addProfesor',
+						title: 'Dodavanje neuspesno',
+						text: data.message,
+						type: 'danger',
+						duration: 8000
+					})
 				}
 			}).catch(err => {
 				this.showErrorAlert = true;

@@ -11,14 +11,18 @@
             <b-nav-item to="/" exact>Home</b-nav-item>
             <b-nav-item to="/profesori/search" exact>Search Profesori</b-nav-item>
             <b-nav-item to="/profesori/add" exact>Add Profesor</b-nav-item>
-            <b-nav-item to="/login" exact v-if="!this.$session.has('userData')">Login</b-nav-item>
-            <b-nav-item to="/register" exact v-if="!this.$session.has('userData')">Register</b-nav-item>
-            <b-nav-item @click="logout()" exact v-if="this.$session.has('userData')">Logout</b-nav-item>
+          </b-navbar-nav>
+
+          <b-navbar-nav class="ml-auto">
+            <b-nav-item-dropdown text="User" right>
+              <b-dropdown-item to="/login" exact v-if="!this.$session.has('userData')">Login</b-dropdown-item>
+              <b-dropdown-item to="/register" exact v-if="!this.$session.has('userData')">Register</b-dropdown-item>
+              <b-dropdown-item @click="logout()" exact v-if="this.$session.has('userData')">Logout</b-dropdown-item>
+            </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-collapse>
       </b-navbar>
-      <br/>
-      <router-view/>
+      <router-view id="routerView"/>
     </div>
   </div>
 </template>
@@ -41,14 +45,17 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  margin-top: 10px;
 }
 #wrapper {
   width: 700px;
   margin-left: calc((100% - 700px)/2);
 }
 #navbar {
+  margin-top: 10px;
   border-radius: 5px;
+}
+#routerView {
+  margin-top: 10px;
 }
 
 @media screen and (max-width: 767px) {
@@ -60,6 +67,7 @@ export default {
     margin-left: 0;
   }
   #navbar {
+    margin-top: 0;
     border-radius: 0;
   }
 }

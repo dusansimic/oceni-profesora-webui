@@ -1,8 +1,13 @@
 <template>
 	<div class="Register">
-		<b-alert :show="showErrorAlert" variant="danger" dismissible @dismissed="showErrorAlert=false" class="alert">
-			{{ errorMessage }}
-		</b-alert>
+		<notifications id="notificationGroup" group="registration" position="bottom center" animation-type="css">
+			<template slot="body" slot-scope="props">
+				<b-alert show :variant="props.item.type">
+					<h4>{{ props.item.title }}</h4>
+					<p>{{ props.item.text }}</p>
+				</b-alert>
+			</template>
+		</notifications>
 
 		<b-card id="registerForm">
 			<b-form @submit="onSubmit()">
@@ -40,9 +45,7 @@ export default {
 				password2: '',
 				password2State: null,
 				hashedPassword: ''
-			},
-			showErrorAlert: false,
-			errorMessage: ''
+			}
 		}
 	},
 	methods: {
@@ -72,13 +75,21 @@ export default {
 				})
 			}).then(res => res.json()).then(data => {
 				if (data.ok) {
-					console.log('A okay.')
-				} else {
-					console.log('Not okay.')
-				}
-				if (data.status > 399) {
-					this.errorMessage = data.message
-					this.showErrorAlert = true
+					this.$notify({
+						group: 'registration',
+						title: 'Registration successful',
+						text: 'The registration was successful. Please login now.',
+						type: 'success',
+						duration: 8000
+					})
+				} else if (data.status > 399) {
+					this.$notify({
+						group: 'registration',
+						title: 'Registration failed',
+						text: data.message,
+						type: 'danger',
+						duration: 8000
+					})
 				}
 			}).catch(err => {
 				console.log('in err')
@@ -96,6 +107,10 @@ export default {
 	width: 500px;
 	margin-left: calc((100% - 500px)/2);
 }
+#notificationGroup {
+	margin-bottom: 10px;
+	margin-right: 10px;
+}
 
 @media screen and (max-width: 767px) {
 	.Register {
@@ -103,8 +118,8 @@ export default {
 		margin-left: calc((100% - 95%)/2);
 	}
 	#registerForm {
-		width: 95%;
-		margin-left: calc((100% - 95%)/2);
+		width: 100%;
+		margin-left: 0;
 	}
 }
 </style>

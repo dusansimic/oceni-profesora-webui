@@ -7,7 +7,7 @@
 		<h2>{{ profesorData.ime }} {{ profesorData.prezime }}</h2>
 		<p>JMBG: {{ profesorData.jmbg }}</p>
 		<p v-if="profesorData.srednjaOcena">Srednja ocena: {{ profesorData.srednjaOcena }}</p>
-		<router-link to="/profesori/search"><b-button type="button" :size="sm" variant="danger" v-on:click="deleteUser()">Delete user</b-button></router-link>
+		<router-link to="/profesori/search"><b-button type="button" variant="danger" v-on:click="deleteUser()">Delete user</b-button></router-link>
 
 		<b-form @submit="onSubmitKomentar()" @reset="onResetKomentar()" v-if="this.$session.has('userData')">
 			<b-form-group label="Tekst komentara:" label-for="textInput">
@@ -39,7 +39,7 @@
 		</b-form><br/>
 		<h3>Komentari:</h3><br/>
 		<ul id="listOfKomentari">
-			<li v-for="komentar in komentari" v-bind:key="komentar.user">
+			<li v-for="komentar in komentari" v-bind:key="komentar._id">
 				<b-card class="komentarCard">
 					<p>{{ komentar.text }}</p>
 					<p><i>by <strong>{{ komentar.user }}</strong> {{ getTimeFromNow(komentar.vreme) }}</i></p>
@@ -48,8 +48,8 @@
 							<b-col cols="4.5">
 								<b-button type="button" variant="danger" @click="deleteKomentar(komentar._id)">Delete</b-button>
 								<b-button-group>
-									<b-button type="button" @click="onLike(true, komentar._id)" v-b-tooltip.hover :title="getNumberOfLikes(komentar, true)">Like</b-button>
-									<b-button type="button" @click="onLike(false, komentar._id)" v-b-tooltip.hover :title="getNumberOfLikes(komentar, false)">Dislike</b-button>
+									<b-button type="button" @click="onLike(true, komentar._id)" :disabled="komentar.liked[0] == 'true'" v-b-tooltip.hover :title="getNumberOfLikes(komentar, true)">Like</b-button>
+									<b-button type="button" @click="onLike(false, komentar._id)" :disabled="komentar.disliked[0] == 'true'" v-b-tooltip.hover :title="getNumberOfLikes(komentar, false)">Dislike</b-button>
 								</b-button-group>
 							</b-col>
 						</b-row>
@@ -84,20 +84,28 @@ export default {
 			fetch(`${this.$config.ApiUrl}/profesor?jmbg=${profesorJMBG}`, {
 				method: 'GET'
 			}).then(res => res.json()).then(data => {
+				if (data.status > 399) {
+					this.errorMessage = data.message
+					this.showErrorAlert = true
+				}
 				this.profesorData = JSON.parse(JSON.stringify(data[0]));
 				this.getKomentari();
 			}).catch(err => {
 				if (err) {
-					this.showErrorAlert = true;
-					this.errorMessage = err.message;
+					this.showErrorAlert = true
+					this.errorMessage = err.message
 				}
 			});
 		},
 		getKomentari () {
-			fetch(`${this.$config.ApiUrl}/komentar/${this.profesorData.jmbg}`, {
+			fetch(`${this.$config.ApiUrl}/komentar/${this.profesorData.jmbg}/${this.$session.get('userData').username}`, {
 				method: 'GET'
 			}).then(res => res.json()).then(data => {
-				this.komentari = JSON.parse(JSON.stringify(data[0].komentari));
+				if (data.status > 399) {
+					this.errorMessage = data.message
+					this.showErrorAlert = true
+				}
+				this.komentari = JSON.parse(JSON.stringify(data.komentari));
 			}).catch(err => {
 				if (err) {
 					this.showErrorAlert = true;
@@ -109,16 +117,23 @@ export default {
 			fetch(`${this.$config.ApiUrl}/komentar/${this.profesorData.jmbg}`, {
 				method: 'PUT',
 				headers: new Headers({
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'x-access-token': this.$session.get('userData').token
 				}),
 				body: JSON.stringify({
 					user: this.$session.get('userData').username,
 					text: this.komentarData.text,
 					vreme: new Date(),
 					likes: 0,
-					dislikes: 0
+					liked: [],
+					dislikes: 0,
+					disliked: []
 				})
 			}).then(res => res.json()).then(data => {
+				if (data.status > 399) {
+					this.errorMessage = data.message
+					this.showErrorAlert = true
+				}
 				this.onResetOcena()
 				this.getKomentari()
 				this.onResetOcena()
@@ -141,16 +156,25 @@ export default {
 			fetch(`${this.$config.ApiUrl}/ocena/${this.profesorData.jmbg}`, {
 				method: 'PUT',
 				headers: new Headers({
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'x-access-token': this.$session.get('userData').token
 				}),
 				body: JSON.stringify({
 					ocena: parseInt(this.ocenaData.ocena)
 				})
 			}).then(res => res.json()).then(data => {
+				if (data.status > 399) {
+					this.errorMessage = data.message
+					this.showErrorAlert = true
+				}
 				this.onResetOcena();
 				fetch(`${this.$config.ApiUrl}/profesor?jmbg=${this.profesorData.jmbg}`, {
 					method: 'GET'
 				}).then(res => res.json()).then(data => {
+					if (data.status > 399) {
+						this.errorMessage = data.message
+						this.showErrorAlert = true
+					}
 					this.profesorData = JSON.parse(JSON.stringify(data[0]));
 				}).catch(err => {
 					if (err) {
@@ -180,9 +204,17 @@ export default {
 			fetch(`${this.$config.ApiUrl}/komentar/${(isLike ? 'like' : 'dislike')}/${this.profesorData.jmbg}/${komentarID}`, {
 				method: 'PUT',
 				headers: new Headers({
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'x-access-token': this.$session.get('userData').token
+				}),
+				body: JSON.stringify({
+					username: this.$session.get('userData').username
 				})
 			}).then(res => res.json()).then(data => {
+				if (data.status > 399) {
+					this.errorMessage = data.message
+					this.showErrorAlert = true
+				}
 				this.getKomentari();
 			}).catch(err => {
 				if (err) {
@@ -200,7 +232,10 @@ export default {
 		},
 		deleteUser () {
 			fetch(`${this.$config.ApiUrl}/profesor/${this.profesorData.jmbg}`, {
-				method: 'DELETE'
+				method: 'DELETE',
+				headers: new Headers({
+					'x-access-token': this.$session.get('userData').token
+				})
 			}).then(res => res.json()).then(data => {
 				console.log(data);
 			}).catch(err => {
@@ -212,7 +247,10 @@ export default {
 		},
 		deleteKomentar (komentarID) {
 			fetch(`${this.$config.ApiUrl}/komentar/${this.profesorData.jmbg}/${komentarID}`, {
-				method: 'DELETE'
+				method: 'DELETE',
+				headers: new Headers({
+					'x-access-token': this.$session.get('userData').token
+				})
 			}).then(res => res.json()).then(data => {
 				console.log(data);
 				this.getKomentari();
@@ -254,8 +292,8 @@ export default {
 	#listOfKomentari {
 		padding: 0;
 		list-style-type: none;
-		width: 95%;
-		margin-left: calc((100% - 95%)/2);
+		width: 100%;
+		margin-left: 0;
 		margin-top: 20px;
 	}
 }

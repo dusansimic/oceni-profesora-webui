@@ -141,14 +141,14 @@ export default {
 		margin-left: calc((100% - 95%)/2);
 	}
 	.alert {
-		width: 95%;
-		margin-left: calc((100% - 95%)/2);
+		width: 100%;
+		margin-left: 0;
 	}
 	#listOfProfesori {
 		padding: 0;
 		list-style-type: none;
-		width: 95%;
-		margin-left: calc((100% - 95%)/2);
+		width: 100%;
+		margin-left: 0;
 		margin-top: 20px;
 	}
 	#listOfProfesori li {

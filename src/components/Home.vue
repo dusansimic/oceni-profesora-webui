@@ -1,7 +1,7 @@
 <template>
 	<div class="Home">
 		<h1 v-if="!username">Hello world</h1>
-		<h1 v-if="username"> Hello {{ username }}</h1>
+		<h1 v-if="username">Hello {{ username }}</h1>
 		<p v-if="username" id="tokenText">{{ token }}</p>
 	</div>
 </template>
